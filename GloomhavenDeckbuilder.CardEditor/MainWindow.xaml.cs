@@ -1,4 +1,5 @@
 ﻿using GloomhavenDeckbuilder.CardEditor.Models;
+using GloomhavenDeckbuilder.CardEditor.Utils;
 using Newtonsoft.Json;
 using Ookii.Dialogs.Wpf;
 using System;
@@ -235,7 +236,7 @@ namespace GloomhavenDeckbuilder.CardEditor
             if (!ImagePaths.Any()) return;
 
             CurrentImageIndex = index;
-            CardImage.Source = BitmapToImageSource((Bitmap)System.Drawing.Image.FromFile(ImagePaths[index]));
+            CardImage.Source = ImageUtils.BitmapToImageSource((Bitmap)System.Drawing.Image.FromFile(ImagePaths[index]));
 
             Card = new();
             ResetForm();
@@ -250,6 +251,20 @@ namespace GloomhavenDeckbuilder.CardEditor
             {
                 card = new();
                 card.ImgName = Path.GetFileNameWithoutExtension(ImagePaths[index]);
+
+                // example -> "gh-blood-pact" turns to "Blood Pact"
+                card.Title = string.Join(" ", card.ImgName.Split('-').Skip(1).Select(x => x.First().ToString().ToUpper() + x[1..]));
+
+                if (int.TryParse(OcrUtils.DoMagic(ImageUtils.CaptureArea(183, 72, 31, 20, (BitmapImage)CardImage.Source), true), out int level))
+                    card.Level = level;
+                else
+                    card.Level = null;
+
+                if (int.TryParse(OcrUtils.DoMagic(ImageUtils.CaptureArea(173, 297, 228 - 173, 342 - 297, (BitmapImage)CardImage.Source)), out int initiative))
+                    card.Initiative = initiative;
+                else
+                    card.Initiative = null;
+
                 Cards.Add(card);
             }
 
@@ -258,25 +273,6 @@ namespace GloomhavenDeckbuilder.CardEditor
             UpdateJson();
 
             UpdateAllSources();
-        }
-
-        /// <summary>
-        /// https://stackoverflow.com/questions/22499407/how-to-display-a-bitmap-in-a-wpf-image
-        /// </summary>
-        /// <param name="bitmap"></param>
-        /// <returns></returns>
-        private static BitmapImage BitmapToImageSource(Bitmap bitmap)
-        {
-            using MemoryStream memory = new();
-            bitmap.Save(memory, System.Drawing.Imaging.ImageFormat.Bmp);
-            memory.Position = 0;
-            BitmapImage bitmapimage = new();
-            bitmapimage.BeginInit();
-            bitmapimage.StreamSource = memory;
-            bitmapimage.CacheOption = BitmapCacheOption.OnLoad;
-            bitmapimage.EndInit();
-
-            return bitmapimage;
         }
     }
 }
