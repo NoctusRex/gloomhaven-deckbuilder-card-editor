@@ -216,7 +216,7 @@ namespace GloomhavenDeckbuilder.CardEditor
             PreviousImageButton.IsEnabled = true;
             LoadImage(CurrentImageIndex + 1);
 
-            TitleTextBox.Focus();
+            LevelTextBox.Focus();
         }
 
         private void PreviousImageButton_Click(object sender, RoutedEventArgs e)
@@ -254,11 +254,6 @@ namespace GloomhavenDeckbuilder.CardEditor
 
                 // example -> "gh-blood-pact" turns to "Blood Pact"
                 card.Title = string.Join(" ", card.ImgName.Split('-').Skip(1).Select(x => x.First().ToString().ToUpper() + x[1..]));
-
-                if (int.TryParse(OcrUtils.DoMagic(ImageUtils.CaptureArea(183, 72, 31, 20, (BitmapImage)CardImage.Source), true), out int level))
-                    card.Level = level;
-                else
-                    card.Level = null;
 
                 if (int.TryParse(OcrUtils.DoMagic(ImageUtils.CaptureArea(173, 297, 228 - 173, 342 - 297, (BitmapImage)CardImage.Source)), out int initiative))
                     card.Initiative = initiative;
