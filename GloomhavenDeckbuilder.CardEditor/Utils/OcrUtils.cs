@@ -24,7 +24,7 @@ namespace GloomhavenDeckbuilder.CardEditor.Utils
         public static string DoMagic(Bitmap image, bool scaleUp = false)
         {
             if (image is null) return string.Empty;
-            PrepareForOcr(image,scaleUp).Save($"./{DateTime.Now.Ticks}.png");
+
             return SendFile(PrepareForOcr(image, scaleUp));
         }
 
