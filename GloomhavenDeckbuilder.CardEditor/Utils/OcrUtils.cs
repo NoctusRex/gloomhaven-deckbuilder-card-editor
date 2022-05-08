@@ -30,26 +30,33 @@ namespace GloomhavenDeckbuilder.CardEditor.Utils
 
         private static string SendFile(Bitmap image)
         {
-            HttpClient httpClient = new();
-            httpClient.Timeout = new TimeSpan(0, 0, 30);
+            try
+            {
+                HttpClient httpClient = new();
+                httpClient.Timeout = new TimeSpan(0, 0, 5);
 
-            MultipartFormDataContent form = new();
-            form.Add(new StringContent("K86186512588957"), "apikey");
-            form.Add(new StringContent("eng"), "language");
-            form.Add(new StringContent("2"), "ocrengine");
-            form.Add(new StringContent("true"), "scale");
-            form.Add(new StringContent("png"), "filetype");
-            form.Add(new StringContent("data:image/png;base64," + ImageUtils.BitmapToBase64(image, ImageFormat.Png)), "base64Image");
+                MultipartFormDataContent form = new();
+                form.Add(new StringContent("K86186512588957"), "apikey");
+                form.Add(new StringContent("eng"), "language");
+                form.Add(new StringContent("2"), "ocrengine");
+                form.Add(new StringContent("true"), "scale");
+                form.Add(new StringContent("png"), "filetype");
+                form.Add(new StringContent("data:image/png;base64," + ImageUtils.BitmapToBase64(image, ImageFormat.Png)), "base64Image");
 
-            HttpResponseMessage response = httpClient.PostAsync("https://api.ocr.space/Parse/Image", form).Result;
-            string strContent = response.Content.ReadAsStringAsync().Result;
+                HttpResponseMessage response = httpClient.PostAsync("https://api.ocr.space/Parse/Image", form).Result;
+                string strContent = response.Content.ReadAsStringAsync().Result;
 
-            RootObject? ocrResult = JsonConvert.DeserializeObject<RootObject>(strContent);
+                RootObject? ocrResult = JsonConvert.DeserializeObject<RootObject>(strContent);
 
-            if (ocrResult != null && ocrResult.OCRExitCode == 1)
-                return ocrResult.ParsedResults?.FirstOrDefault()?.ParsedText ?? "";
-            else
+                if (ocrResult != null && ocrResult.OCRExitCode == 1)
+                    return ocrResult.ParsedResults?.FirstOrDefault()?.ParsedText ?? "";
+                else
+                    return "";
+            }
+            catch
+            {
                 return "";
+            }
         }
 
         public static Bitmap PrepareForOcr(Bitmap bitmap, bool scaleUp)

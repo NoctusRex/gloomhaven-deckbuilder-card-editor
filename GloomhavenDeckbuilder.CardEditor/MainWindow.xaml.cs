@@ -8,17 +8,14 @@ using System.ComponentModel;
 using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+using System.Windows.Threading;
 using Path = System.IO.Path;
 
 namespace GloomhavenDeckbuilder.CardEditor
@@ -31,7 +28,7 @@ namespace GloomhavenDeckbuilder.CardEditor
         public event PropertyChangedEventHandler? PropertyChanged;
 
         private Card Card { get; set; } = new();
-        private List<Card> Cards { get; set; } = new List<Card>();
+        private Deck Deck { get; set; } = new();
         private string Directory { get; set; } = string.Empty;
         private List<string> ImagePaths { get; set; } = new List<string>();
         private int CurrentImageIndex { get; set; }
@@ -53,6 +50,7 @@ namespace GloomhavenDeckbuilder.CardEditor
         {
             get
             {
+                if (Card.Level == 0) return "X";
                 if (Card.Level is null) return "";
 
                 return Card.Level.Value.ToString();
@@ -62,7 +60,12 @@ namespace GloomhavenDeckbuilder.CardEditor
                 if (string.IsNullOrEmpty(value))
                     Card.Level = null;
                 else
-                    Card.Level = int.Parse(value);
+                {
+                    if (value.ToUpper() == "X")
+                        Card.Level = 0;
+                    else
+                        Card.Level = int.Parse(value);
+                }
 
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(CardLevel)));
                 UpdateJson();
@@ -123,6 +126,20 @@ namespace GloomhavenDeckbuilder.CardEditor
             }
         }
 
+        public bool CardPermanent
+        {
+            get
+            {
+                return Card.Permanent;
+            }
+            set
+            {
+                Card.Permanent = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(CardPermanent)));
+                UpdateJson();
+            }
+        }
+
         public MainWindow()
         {
             InitializeComponent();
@@ -140,6 +157,19 @@ namespace GloomhavenDeckbuilder.CardEditor
             InitiativeTextBox.IsEnabled = false;
             CounterTextBox.IsEnabled = false;
             LosableCheckBox.IsEnabled = false;
+            PermanentCheckBox.IsEnabled = false;
+
+            new Task(() =>
+              {
+                  Dispatcher.Invoke(() =>
+                  {
+                      while (true)
+                      {
+                          Application.Current.Dispatcher.Invoke(DispatcherPriority.Background, new Action(delegate { }));
+                          NextImageButton.IsEnabled = IsFormValid(this);
+                      }
+                  });
+              }).Start();
         }
 
         private void UpdateAllSources()
@@ -156,7 +186,7 @@ namespace GloomhavenDeckbuilder.CardEditor
         {
             if (!DoUpdateJson) return;
             if (string.IsNullOrEmpty(Directory)) return;
-            File.WriteAllText(SaveFilePath, JsonConvert.SerializeObject(Cards, Formatting.Indented));
+            File.WriteAllText(SaveFilePath, JsonConvert.SerializeObject(Deck, Formatting.Indented));
         }
 
         private void ResetForm()
@@ -177,6 +207,9 @@ namespace GloomhavenDeckbuilder.CardEditor
 
             CardInitiative = Card.Initiative.HasValue ? Card.Initiative.Value.ToString() : "";
             InitiativeTextBox.Text = CardInitiative;
+
+            CardPermanent = Card.Permanent;
+            PermanentCheckBox.IsChecked = CardPermanent;
 
             DoUpdateJson = true;
         }
@@ -202,6 +235,7 @@ namespace GloomhavenDeckbuilder.CardEditor
                 InitiativeTextBox.IsEnabled = true;
                 CounterTextBox.IsEnabled = true;
                 LosableCheckBox.IsEnabled = true;
+                PermanentCheckBox.IsEnabled = true;
             }
         }
 
@@ -243,10 +277,11 @@ namespace GloomhavenDeckbuilder.CardEditor
 
             if (!File.Exists(SaveFilePath)) UpdateJson(); // To create the file
 
-            List<Card> cards = JsonConvert.DeserializeObject<List<Card>>(File.ReadAllText(SaveFilePath)) ?? new List<Card>();
-            Cards = cards;
+            Deck deck = JsonConvert.DeserializeObject<Deck>(File.ReadAllText(SaveFilePath)) ?? new();
+            Deck = deck;
+            if (string.IsNullOrEmpty(Deck.Path)) Deck.Path = Directory.Split('\\').Last();
 
-            Card? card = Cards.FirstOrDefault(x => x.ImgName == Path.GetFileNameWithoutExtension(ImagePaths[index]));
+            Card? card = Deck.Cards.FirstOrDefault(x => x.ImgName == Path.GetFileNameWithoutExtension(ImagePaths[index]));
             if (card is null)
             {
                 card = new();
@@ -260,7 +295,7 @@ namespace GloomhavenDeckbuilder.CardEditor
                 else
                     card.Initiative = null;
 
-                Cards.Add(card);
+                Deck.Cards.Add(card);
             }
 
             Card = card;
@@ -269,5 +304,27 @@ namespace GloomhavenDeckbuilder.CardEditor
 
             UpdateAllSources();
         }
+
+        private void PermanentCheckBox_Click(object sender, RoutedEventArgs e)
+        {
+            if (PermanentCheckBox.IsChecked.HasValue && PermanentCheckBox.IsChecked.Value)
+            {
+                LosableCheckBox.IsChecked = false;
+                LosableCheckBox.IsEnabled = false;
+            }
+            else
+            {
+                LosableCheckBox.IsEnabled = true;
+            }
+        }
+
+        public bool IsFormValid(DependencyObject parent)
+        {
+            return !Validation.GetHasError(parent) &&
+                        LogicalTreeHelper.GetChildren(parent).
+                        OfType<DependencyObject>().
+                        All(IsFormValid);
+        }
+
     }
 }
