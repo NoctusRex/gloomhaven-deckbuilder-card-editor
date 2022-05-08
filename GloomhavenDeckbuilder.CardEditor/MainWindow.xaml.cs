@@ -165,8 +165,15 @@ namespace GloomhavenDeckbuilder.CardEditor
                   {
                       while (true)
                       {
-                          Application.Current.Dispatcher.Invoke(DispatcherPriority.Background, new Action(delegate { }));
-                          NextImageButton.IsEnabled = IsFormValid(this);
+                          try
+                          {
+                              Application.Current.Dispatcher.Invoke(DispatcherPriority.Background, new Action(delegate { }));
+                              NextImageButton.IsEnabled = IsFormValid(this);
+                          }
+                          catch
+                          {
+                              // this is supposed to be this way
+                          }
                       }
                   });
               }).Start();
@@ -285,10 +292,10 @@ namespace GloomhavenDeckbuilder.CardEditor
             if (card is null)
             {
                 card = new();
-                card.ImgName = Path.GetFileNameWithoutExtension(ImagePaths[index]);
+                card.ImgName = Path.GetFileName(ImagePaths[index]);
 
                 // example -> "gh-blood-pact" turns to "Blood Pact"
-                card.Title = string.Join(" ", card.ImgName.Split('-').Skip(1).Select(x => x.First().ToString().ToUpper() + x[1..]));
+                card.Title = string.Join(" ", Path.GetFileNameWithoutExtension(ImagePaths[index]).Split('-').Select(x => x.First().ToString().ToUpper() + x[1..]));
 
                 if (int.TryParse(OcrUtils.DoMagic(ImageUtils.CaptureArea(173, 297, 228 - 173, 342 - 297, (BitmapImage)CardImage.Source)), out int initiative))
                     card.Initiative = initiative;
