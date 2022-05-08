@@ -1,0 +1,76 @@
+﻿<Window x:Class="GloomhavenDeckbuilder.CardEditor.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:GloomhavenDeckbuilder.CardEditor" 
+        xmlns:c="clr-namespace:GloomhavenDeckbuilder.CardEditor.ValidationRules"
+        mc:Ignorable="d"
+        Title="Gloomhaven Deck Editor" Height="720" Width="1080" ResizeMode="NoResize" Loaded="Window_Loaded">
+    <Window.Background>
+        <ImageBrush ImageSource="/background.jpg"/>
+    </Window.Background>
+    <Grid>
+        <Image Name="CardImage" Height="600" Width="400" Margin="39,24,641,80" Stretch="Fill"/>
+        <Grid Margin="476,499,56,71">
+            <Button x:Name="PreviousImageButton" Content="⇐" HorizontalAlignment="Left" Width="100" FontSize="24" IsTabStop="False" VerticalAlignment="Top" Click="PreviousImageButton_Click"/>
+            <Button x:Name="NextImageButton" Content="⇒" HorizontalAlignment="Right" Width="100" FontSize="24" TabIndex="5" VerticalAlignment="Top" Click="NextImageButton_Click"/>
+            <Button x:Name="OpenDirectoryButton" Content="📁" HorizontalAlignment="Center" Width="100" FontSize="24" IsTabStop="False" VerticalAlignment="Top" Click="OpenDirectoryButton_Click"/>
+        </Grid>
+        <Label x:Name="TitleLabel" Content="Title" HorizontalAlignment="Left" Margin="480,64,0,0" VerticalAlignment="Top" Height="40" Width="521" FontSize="24" Foreground="White" />
+        <Label x:Name="LosableLabel" Content="Losable" HorizontalAlignment="Left" Margin="480,384,0,0" VerticalAlignment="Top" Height="40" Width="521" FontSize="24" Foreground="White" />
+        <Label x:Name="LevelLabel" Content="Level" HorizontalAlignment="Left" Margin="480,145,0,0" VerticalAlignment="Top" Height="40" Width="521" FontSize="24" Foreground="White" />
+        <Label x:Name="InitiativeLabel" Content="Initiative" HorizontalAlignment="Left" Margin="480,225,0,0" VerticalAlignment="Top" Height="40" Width="521" FontSize="24" Foreground="White" />
+        <Label x:Name="CounterLabel" Content="Counter" HorizontalAlignment="Left" Margin="480,304,0,0" VerticalAlignment="Top" Height="40" Width="521" FontSize="24" Foreground="White" />
+        <TextBox x:Name="TitleTextBox" HorizontalAlignment="Left" Margin="480,104,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="520" Height="40" FontSize="24"
+                 Validation.ErrorTemplate="{StaticResource ValidationTemplate}"
+                 Style="{StaticResource TextBoxInError}" TabIndex="0">
+            <TextBox.Text>
+                <Binding Path="CardTitle" UpdateSourceTrigger="PropertyChanged" >
+                    <Binding.ValidationRules>
+                        <c:NotEmptyValidationRule/>
+                    </Binding.ValidationRules>
+                </Binding>
+            </TextBox.Text>
+        </TextBox>
+        <TextBox x:Name="LevelTextBox" HorizontalAlignment="Left" Margin="480,185,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="520" Height="40" FontSize="24"
+                 Validation.ErrorTemplate="{StaticResource ValidationTemplate}"
+                 Style="{StaticResource TextBoxInError}" TabIndex="1">
+            <TextBox.Text>
+                <Binding Path="CardLevel" UpdateSourceTrigger="PropertyChanged" >
+                    <Binding.ValidationRules>
+                        <c:MinMaxValidationRule Min="1" Max="9"/>
+                    </Binding.ValidationRules>
+                </Binding>
+            </TextBox.Text>
+        </TextBox>
+        <TextBox x:Name="InitiativeTextBox" HorizontalAlignment="Left" Margin="480,265,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="520" Height="40" FontSize="24"
+                 Validation.ErrorTemplate="{StaticResource ValidationTemplate}"
+                 Style="{StaticResource TextBoxInError}" TabIndex="2">
+            <TextBox.Text>
+                <Binding Path="CardInitiative" UpdateSourceTrigger="PropertyChanged" >
+                    <Binding.ValidationRules>
+                        <c:MinMaxValidationRule Min="1" Max="99"/>
+                    </Binding.ValidationRules>
+                </Binding>
+            </TextBox.Text>
+        </TextBox>
+        <TextBox x:Name="CounterTextBox" HorizontalAlignment="Left" Margin="480,344,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="520" Height="40" FontSize="24"
+                 Validation.ErrorTemplate="{StaticResource ValidationTemplate}"
+                 Style="{StaticResource TextBoxInError}" TabIndex="3">
+            <TextBox.Text>
+                <Binding Path="CardCounter" UpdateSourceTrigger="PropertyChanged" >
+                    <Binding.ValidationRules>
+                        <c:MinMaxValidationRule Min="0" Max="6"/>
+                    </Binding.ValidationRules>
+                </Binding>
+            </TextBox.Text>
+        </TextBox>
+        <CheckBox x:Name="LosableCheckBox" IsChecked="{Binding CardLosable}" HorizontalAlignment="Left" Margin="478,425,0,0" VerticalAlignment="Top" Height="16" Width="208" TabIndex="4">
+            <CheckBox.LayoutTransform>
+                <ScaleTransform ScaleX="2.5" ScaleY="2.5" />
+            </CheckBox.LayoutTransform>
+        </CheckBox>
+
+    </Grid>
+</Window>
