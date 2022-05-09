@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace GloomhavenDeckbuilder.CardEditor.Models
 {
-    public class Deck
+    public class CardCollection
     {
         [JsonProperty("path")]
         public string Path { get; set; } = string.Empty;

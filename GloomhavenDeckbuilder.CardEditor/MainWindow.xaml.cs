@@ -16,7 +16,9 @@ using System.Windows.Data;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
+using Color = System.Drawing.Color;
 using Path = System.IO.Path;
+using Pen = System.Drawing.Pen;
 
 namespace GloomhavenDeckbuilder.CardEditor
 {
@@ -28,12 +30,13 @@ namespace GloomhavenDeckbuilder.CardEditor
         public event PropertyChangedEventHandler? PropertyChanged;
 
         private Card Card { get; set; } = new();
-        private Deck Deck { get; set; } = new();
+        private CardCollection CardCollection { get; set; } = new();
         private string Directory { get; set; } = string.Empty;
         private List<string> ImagePaths { get; set; } = new List<string>();
         private int CurrentImageIndex { get; set; }
         private string SaveFilePath => Path.Combine(Directory, $"{Directory.Split('\\').Last()}.json");
         private bool DoUpdateJson { get; set; } = true;
+        private Bitmap? OriginalBitmap { get; set; } = null;
 
         public string CardTitle
         {
@@ -170,7 +173,7 @@ namespace GloomhavenDeckbuilder.CardEditor
                               Application.Current.Dispatcher.Invoke(DispatcherPriority.Background, new Action(delegate { }));
                               NextImageButton.IsEnabled = IsFormValid(this);
                           }
-                          catch
+                          catch (Exception ex)
                           {
                               // this is supposed to be this way
                           }
@@ -193,7 +196,7 @@ namespace GloomhavenDeckbuilder.CardEditor
         {
             if (!DoUpdateJson) return;
             if (string.IsNullOrEmpty(Directory)) return;
-            File.WriteAllText(SaveFilePath, JsonConvert.SerializeObject(Deck, Formatting.Indented));
+            File.WriteAllText(SaveFilePath, JsonConvert.SerializeObject(CardCollection, Formatting.Indented));
         }
 
         private void ResetForm()
@@ -277,18 +280,19 @@ namespace GloomhavenDeckbuilder.CardEditor
             if (!ImagePaths.Any()) return;
 
             CurrentImageIndex = index;
-            CardImage.Source = ImageUtils.BitmapToImageSource((Bitmap)System.Drawing.Image.FromFile(ImagePaths[index]));
+            OriginalBitmap = (Bitmap)System.Drawing.Image.FromFile(ImagePaths[index]);
+            CardImage.Source = ImageUtils.BitmapToImageSource(OriginalBitmap);
 
             Card = new();
             ResetForm();
 
             if (!File.Exists(SaveFilePath)) UpdateJson(); // To create the file
 
-            Deck deck = JsonConvert.DeserializeObject<Deck>(File.ReadAllText(SaveFilePath)) ?? new();
-            Deck = deck;
-            if (string.IsNullOrEmpty(Deck.Path)) Deck.Path = Directory.Split('\\').Last();
+            CardCollection cardCollection = JsonConvert.DeserializeObject<CardCollection>(File.ReadAllText(SaveFilePath)) ?? new();
+            CardCollection = cardCollection;
+            if (string.IsNullOrEmpty(CardCollection.Path)) CardCollection.Path = Directory.Split('\\').Last();
 
-            Card? card = Deck.Cards.FirstOrDefault(x => x.ImgName == Path.GetFileNameWithoutExtension(ImagePaths[index]));
+            Card? card = CardCollection.Cards.FirstOrDefault(x => x.ImgName == Path.GetFileName(ImagePaths[index]));
             if (card is null)
             {
                 card = new();
@@ -302,7 +306,7 @@ namespace GloomhavenDeckbuilder.CardEditor
                 else
                     card.Initiative = null;
 
-                Deck.Cards.Add(card);
+                CardCollection.Cards.Add(card);
             }
 
             Card = card;
@@ -333,5 +337,32 @@ namespace GloomhavenDeckbuilder.CardEditor
                         All(IsFormValid);
         }
 
+        private void CardImage_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+
+        }
+
+        private void CardImage_MouseMove(object sender, System.Windows.Input.MouseEventArgs e)
+        {
+            if (OriginalBitmap is null) return;
+
+            Pen pen = new(Color.GreenYellow, 1);
+            int x = (int)e.GetPosition(this).X;
+            int y = (int)e.GetPosition(this).Y;
+            using Bitmap tempBitmap = new(OriginalBitmap.Width, OriginalBitmap.Height);
+            using Graphics g = Graphics.FromImage(tempBitmap);
+
+            g.DrawImage(OriginalBitmap, 0, 0);
+            g.DrawLine(pen, x, 0, x, OriginalBitmap.Height);
+            g.DrawLine(pen, 0, y, OriginalBitmap.Width, y);
+
+            CardImage.Source = ImageUtils.BitmapToImageSource(tempBitmap);
+        }
+
+        private void CardImage_MouseLeave(object sender, System.Windows.Input.MouseEventArgs e)
+        {
+            if (OriginalBitmap is null) return;
+            CardImage.Source = ImageUtils.BitmapToImageSource(OriginalBitmap);
+        }
     }
 }
