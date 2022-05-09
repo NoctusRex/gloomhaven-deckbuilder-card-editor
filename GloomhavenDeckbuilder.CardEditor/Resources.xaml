@@ -17,6 +17,6 @@
         </DockPanel>
     </ControlTemplate>
 
-    <system:String x:Key="version">Gloomhaven Deckbuilder Card Editor - 1.1.0</system:String>
+    <system:String x:Key="version">Gloomhaven Deckbuilder Card Editor - 1.1.1</system:String>
 
 </ResourceDictionary>
