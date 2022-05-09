@@ -1,5 +1,6 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:system="clr-namespace:System;assembly=mscorlib">
 
     <Style x:Key="TextBoxInError" TargetType="{x:Type TextBox}">
         <Style.Triggers>
@@ -15,5 +16,7 @@
             <AdornedElementPlaceholder/>
         </DockPanel>
     </ControlTemplate>
-    
+
+    <system:String x:Key="version">Gloomhaven Deckbuilder Card Editor - 1.1.0</system:String>
+
 </ResourceDictionary>

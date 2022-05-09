@@ -6,12 +6,12 @@
         xmlns:local="clr-namespace:GloomhavenDeckbuilder.CardEditor" 
         xmlns:c="clr-namespace:GloomhavenDeckbuilder.CardEditor.ValidationRules"
         mc:Ignorable="d"
-        Title="Gloomhaven Deck Editor" Height="720" Width="1080" ResizeMode="NoResize" Loaded="Window_Loaded">
+        Title="{StaticResource ResourceKey=version}" Height="720" Width="1080" ResizeMode="NoResize" Loaded="Window_Loaded">
     <Window.Background>
         <ImageBrush ImageSource="/background.jpg"/>
     </Window.Background>
     <Grid>
-        <Image Name="CardImage" Height="600" Width="400" Margin="39,24,641,80" Stretch="Fill" MouseLeftButtonDown="CardImage_MouseLeftButtonDown" MouseMove="CardImage_MouseMove" Cursor="None" MouseLeave="CardImage_MouseLeave"/>
+        <Image Name="CardImage" Height="600" Width="400" Margin="39,24,641,80" Stretch="Fill" MouseLeftButtonDown="CardImage_MouseLeftButtonDown" MouseMove="CardImage_MouseMove" Cursor="None" MouseLeave="CardImage_MouseLeave" MouseRightButtonDown="CardImage_MouseRightButtonDown"/>
         <Grid Margin="481,499,80,71">
             <Button x:Name="PreviousImageButton" Content="⇐" HorizontalAlignment="Left" Width="100" FontSize="24" IsTabStop="False" VerticalAlignment="Top" Click="PreviousImageButton_Click"/>
             <Button x:Name="NextImageButton" Content="⇒" HorizontalAlignment="Right" Width="100" FontSize="24" TabIndex="6" VerticalAlignment="Top" Click="NextImageButton_Click"/>

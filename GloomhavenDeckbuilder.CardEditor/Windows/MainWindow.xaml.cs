@@ -1,5 +1,6 @@
 ﻿using GloomhavenDeckbuilder.CardEditor.Models;
 using GloomhavenDeckbuilder.CardEditor.Utils;
+using GloomhavenDeckbuilder.CardEditor.Windows;
 using Newtonsoft.Json;
 using Ookii.Dialogs.Wpf;
 using System;
@@ -19,6 +20,7 @@ using System.Windows.Threading;
 using Color = System.Drawing.Color;
 using Path = System.IO.Path;
 using Pen = System.Drawing.Pen;
+using Point = System.Drawing.Point;
 
 namespace GloomhavenDeckbuilder.CardEditor
 {
@@ -37,6 +39,8 @@ namespace GloomhavenDeckbuilder.CardEditor
         private string SaveFilePath => Path.Combine(Directory, $"{Directory.Split('\\').Last()}.json");
         private bool DoUpdateJson { get; set; } = true;
         private Bitmap? OriginalBitmap { get; set; } = null;
+        private Bitmap? ModifiedOriginalBitmap { get; set; } = null;
+        private const int ENHANCEMENT_RADIUS = 12;
 
         public string CardTitle
         {
@@ -281,7 +285,6 @@ namespace GloomhavenDeckbuilder.CardEditor
 
             CurrentImageIndex = index;
             OriginalBitmap = (Bitmap)System.Drawing.Image.FromFile(ImagePaths[index]);
-            CardImage.Source = ImageUtils.BitmapToImageSource(OriginalBitmap);
 
             Card = new();
             ResetForm();
@@ -312,6 +315,7 @@ namespace GloomhavenDeckbuilder.CardEditor
             Card = card;
             ResetForm();
             UpdateJson();
+            ModifyOriginalBitmap();
 
             UpdateAllSources();
         }
@@ -339,30 +343,125 @@ namespace GloomhavenDeckbuilder.CardEditor
 
         private void CardImage_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
+            int x = (int)e.GetPosition(this).X;
+            int y = (int)e.GetPosition(this).Y;
 
+            CardEnhancement? enhancement = new CardEnhancementWindow().GetEnhancement(x, y);
+            if (enhancement is null) return;
+
+            Card.Enhancements.Add(enhancement);
+            UpdateJson();
+            ModifyOriginalBitmap();
+        }
+
+        private void CardImage_MouseRightButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            int x = (int)e.GetPosition(this).X;
+            int y = (int)e.GetPosition(this).Y;
+            Rectangle hitbox = new(x - ENHANCEMENT_RADIUS, y - ENHANCEMENT_RADIUS, ENHANCEMENT_RADIUS * 2, ENHANCEMENT_RADIUS * 2);
+
+            foreach (CardEnhancement enhancement in Card.Enhancements)
+            {
+                if (!hitbox.Contains(new Point(enhancement.X, enhancement.Y))) continue;
+
+                Card.Enhancements.Remove(enhancement);
+                UpdateJson();
+                ModifyOriginalBitmap();
+                return;
+            }
         }
 
         private void CardImage_MouseMove(object sender, System.Windows.Input.MouseEventArgs e)
         {
-            if (OriginalBitmap is null) return;
+            if (ModifiedOriginalBitmap is null) return;
 
             Pen pen = new(Color.GreenYellow, 1);
             int x = (int)e.GetPosition(this).X;
             int y = (int)e.GetPosition(this).Y;
-            using Bitmap tempBitmap = new(OriginalBitmap.Width, OriginalBitmap.Height);
+            using Bitmap tempBitmap = new(ModifiedOriginalBitmap.Width, ModifiedOriginalBitmap.Height);
             using Graphics g = Graphics.FromImage(tempBitmap);
 
-            g.DrawImage(OriginalBitmap, 0, 0);
-            g.DrawLine(pen, x, 0, x, OriginalBitmap.Height);
-            g.DrawLine(pen, 0, y, OriginalBitmap.Width, y);
+            g.DrawImage(ModifiedOriginalBitmap, 0, 0);
+
+            g.DrawLine(pen, x, 0, x, y - ENHANCEMENT_RADIUS);
+            g.DrawLine(pen, x, y + ENHANCEMENT_RADIUS, x, ModifiedOriginalBitmap.Height);
+
+            g.DrawLine(pen, 0, y, x - ENHANCEMENT_RADIUS, y);
+            g.DrawLine(pen, x + ENHANCEMENT_RADIUS, y, ModifiedOriginalBitmap.Width, y);
+
+            g.DrawEllipse(pen, x - ENHANCEMENT_RADIUS, y - ENHANCEMENT_RADIUS, ENHANCEMENT_RADIUS * 2, ENHANCEMENT_RADIUS * 2);
+
+            g.DrawString("Click Left  = Add", new Font("Courier New", 6), new SolidBrush(Color.GreenYellow), x - 130, y + 5);
+            g.DrawString("Click Right = Remove", new Font("Courier New", 6), new SolidBrush(Color.GreenYellow), x - 130, y + 17);
 
             CardImage.Source = ImageUtils.BitmapToImageSource(tempBitmap);
         }
 
         private void CardImage_MouseLeave(object sender, System.Windows.Input.MouseEventArgs e)
         {
+            if (ModifiedOriginalBitmap is null) return;
+            CardImage.Source = ImageUtils.BitmapToImageSource(ModifiedOriginalBitmap);
+        }
+
+        private void ModifyOriginalBitmap()
+        {
             if (OriginalBitmap is null) return;
-            CardImage.Source = ImageUtils.BitmapToImageSource(OriginalBitmap);
+
+            ModifiedOriginalBitmap = new(OriginalBitmap.Width, OriginalBitmap.Height);
+            using Graphics g = Graphics.FromImage(ModifiedOriginalBitmap);
+            int border = 2;
+            int hexWidth = 34;
+            int hexHeight = 42;
+            int hexBorder = 3;
+
+            g.DrawImage(OriginalBitmap, 0, 0);
+
+            foreach (CardEnhancement enhancement in Card.Enhancements)
+                if (enhancement.AbilityLine == AbilityLine.Hex)
+                {
+                    g.FillPolygon(new SolidBrush(Color.Red), GetHexagonPoints(new Rectangle(
+                        enhancement.X - (hexWidth / 2),
+                        enhancement.Y - (hexHeight / 2),
+                        hexWidth,
+                        hexHeight)));
+                    g.FillPolygon(new SolidBrush(Color.IndianRed), GetHexagonPoints(new Rectangle(
+                        enhancement.X - (hexWidth / 2) + hexBorder,
+                        enhancement.Y - (hexHeight / 2) + hexBorder,
+                        hexWidth - (hexBorder * 2),
+                        hexHeight - (hexBorder * 2))));
+                }
+                else
+                {
+                    g.FillEllipse(new SolidBrush(Color.Red),
+                        enhancement.X - ENHANCEMENT_RADIUS,
+                        enhancement.Y - ENHANCEMENT_RADIUS,
+                        ENHANCEMENT_RADIUS * 2,
+                        ENHANCEMENT_RADIUS * 2);
+                    g.FillEllipse(new SolidBrush(Color.IndianRed),
+                        enhancement.X - ENHANCEMENT_RADIUS + border,
+                        enhancement.Y - ENHANCEMENT_RADIUS + border,
+                        (ENHANCEMENT_RADIUS * 2) - (border * 2),
+                        (ENHANCEMENT_RADIUS * 2) - (border * 2));
+                }
+
+            CardImage.Source = ImageUtils.BitmapToImageSource(ModifiedOriginalBitmap);
+        }
+
+        private static PointF[] GetHexagonPoints(Rectangle container)
+        {
+            PointF[] points = new PointF[6];
+            float widthHalf = container.Width / 2;
+            float heightHalf = container.Height / 2;
+            float heightQuart = container.Height / 4;
+
+            points[0] = new(container.Left + widthHalf, container.Top);
+            points[1] = new(container.Right, container.Top + heightQuart);
+            points[2] = new(container.Right, container.Top + heightQuart + heightHalf);
+            points[3] = new(container.Left + widthHalf, container.Bottom);
+            points[4] = new(container.Left, container.Top + heightQuart + heightHalf);
+            points[5] = new(container.Left, container.Top + heightQuart);
+
+            return points;
         }
     }
 }

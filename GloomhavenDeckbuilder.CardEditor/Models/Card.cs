@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using System.Collections.Generic;
 
 namespace GloomhavenDeckbuilder.CardEditor.Models
 {
@@ -24,5 +25,8 @@ namespace GloomhavenDeckbuilder.CardEditor.Models
 
         [JsonProperty("permanent")]
         public bool Permanent { get; set; } = false;
+
+        [JsonProperty("enhancementPositions")]
+        public List<CardEnhancement> Enhancements { get; set; } = new();
     }
 }

@@ -1,0 +1,41 @@
+﻿<Window x:Class="GloomhavenDeckbuilder.CardEditor.Windows.CardEnhancementWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:GloomhavenDeckbuilder.CardEditor.Windows"
+        mc:Ignorable="d"
+        Title="Card Enhancement" Height="387" Width="541" ResizeMode="NoResize" Loaded="Window_Loaded">
+    <Window.Background>
+        <ImageBrush ImageSource="/Windows/background.jpg"/>
+    </Window.Background>
+    <Grid>
+        <Label x:Name="AbilityLineLabel" Content="Ability Line" HorizontalAlignment="Left" Margin="20,24,0,0" VerticalAlignment="Top" FontSize="24" Foreground="White" Background="#00000000" FontWeight="Normal"/>
+        <Label x:Name="IsNumericLabel" Content="Is Numeric" HorizontalAlignment="Left" Margin="20,104,0,0" VerticalAlignment="Top" FontSize="24" Foreground="White" Background="#00000000" FontWeight="Normal"/>
+        <Label x:Name="CanTargetEnemiesLabel" Content="Can Target Enemies" HorizontalAlignment="Left" Margin="20,184,0,0" VerticalAlignment="Top" FontSize="24" Height="42" Foreground="White" Background="#00000000" FontWeight="Normal"/>
+        <Label x:Name="CanTargetAlliesLabel" Content="Can Target Allies" HorizontalAlignment="Left" Margin="321,184,0,0" VerticalAlignment="Top" FontSize="24" Height="42" Foreground="White" Background="#00000000" FontWeight="Normal"/>
+        <Label x:Name="IsMovementLabel" Content="Is Movement" HorizontalAlignment="Left" Margin="320,104,0,0" VerticalAlignment="Top" FontSize="24" Foreground="White" Background="#00000000" FontWeight="Normal"/>
+        <Button x:Name="SaveButton" Content="💾" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,305,0,0" Width="182" Height="39" FontSize="24" Click="SaveButton_Click" IsEnabled="False"/>
+        <CheckBox x:Name="IsNumericCheckBox" HorizontalAlignment="Left" VerticalAlignment="Top" Height="16" Width="18" TabIndex="5" Margin="20,146,0,0" IsChecked="True" IsEnabled="False">
+            <CheckBox.LayoutTransform>
+                <ScaleTransform ScaleX="2.5" ScaleY="2.5" />
+            </CheckBox.LayoutTransform>
+        </CheckBox>
+        <CheckBox x:Name="CanTargetEnemiesCheckBox" HorizontalAlignment="Left" VerticalAlignment="Top" Height="16" Width="18" TabIndex="5" Margin="20,226,0,0" IsEnabled="False">
+            <CheckBox.LayoutTransform>
+                <ScaleTransform ScaleX="2.5" ScaleY="2.5" />
+            </CheckBox.LayoutTransform>
+        </CheckBox>
+        <CheckBox x:Name="CanTargetAlliesCheckBox" HorizontalAlignment="Left" VerticalAlignment="Top" Height="16" Width="18" TabIndex="5" Margin="321,226,0,0" IsEnabled="False">
+            <CheckBox.LayoutTransform>
+                <ScaleTransform ScaleX="2.5" ScaleY="2.5" />
+            </CheckBox.LayoutTransform>
+        </CheckBox>
+        <CheckBox x:Name="IsMovementCheckbox" HorizontalAlignment="Left" VerticalAlignment="Top" Height="16" Width="18" TabIndex="5" Margin="320,146,0,0" IsEnabled="False">
+            <CheckBox.LayoutTransform>
+                <ScaleTransform ScaleX="2.5" ScaleY="2.5" />
+            </CheckBox.LayoutTransform>
+        </CheckBox>
+        <ComboBox x:Name="AbilityLineComboBox" HorizontalAlignment="Center" Margin="0,66,0,0" VerticalAlignment="Top" Width="500" FontSize="24" SelectionChanged="AbilityLineComboBox_SelectionChanged"/>
+    </Grid>
+</Window>
