@@ -190,7 +190,7 @@ namespace GloomhavenDeckbuilder.CardEditor
                           try
                           {
                               Application.Current.Dispatcher.Invoke(DispatcherPriority.Background, new Action(delegate { }));
-                              NextImageButton.IsEnabled = IsFormValid(this);
+                              NextImageButton.IsEnabled = IsFormValid(this) && CurrentImageIndex < ImagePaths.Count - 1;
                           }
                           catch (Exception ex)
                           {
@@ -258,6 +258,8 @@ namespace GloomhavenDeckbuilder.CardEditor
             bool? result = dialog.ShowDialog();
             if (result.HasValue && result.Value)
             {
+                Card = new Card();
+                CardCollection = new CardCollection();
                 Directory = dialog.SelectedPath;
                 ImagePaths = System.IO.Directory.GetFiles(Directory, "*.png").ToList();
                 LoadImage(0);
