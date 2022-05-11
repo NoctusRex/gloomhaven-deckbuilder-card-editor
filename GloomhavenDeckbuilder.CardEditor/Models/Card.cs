@@ -26,6 +26,9 @@ namespace GloomhavenDeckbuilder.CardEditor.Models
         [JsonProperty("permanent")]
         public bool Permanent { get; set; } = false;
 
+        [JsonProperty("recoverable")]
+        public bool Recoverable { get; set; } = true;
+
         [JsonProperty("enhancementPositions")]
         public List<CardEnhancement> Enhancements { get; set; } = new();
     }

@@ -147,6 +147,20 @@ namespace GloomhavenDeckbuilder.CardEditor
             }
         }
 
+        public bool CardRecoverable
+        {
+            get
+            {
+                return Card.Recoverable;
+            }
+            set
+            {
+                Card.Recoverable = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(CardRecoverable)));
+                UpdateJson();
+            }
+        }
+
         public MainWindow()
         {
             InitializeComponent();
@@ -165,6 +179,7 @@ namespace GloomhavenDeckbuilder.CardEditor
             CounterTextBox.IsEnabled = false;
             LosableCheckBox.IsEnabled = false;
             PermanentCheckBox.IsEnabled = false;
+            RecoverableCheckBox.IsEnabled = false;
 
             new Task(() =>
               {
@@ -225,6 +240,9 @@ namespace GloomhavenDeckbuilder.CardEditor
             CardPermanent = Card.Permanent;
             PermanentCheckBox.IsChecked = CardPermanent;
 
+            CardRecoverable = Card.Recoverable;
+            RecoverableCheckBox.IsChecked = CardRecoverable;
+
             DoUpdateJson = true;
         }
 
@@ -250,6 +268,7 @@ namespace GloomhavenDeckbuilder.CardEditor
                 CounterTextBox.IsEnabled = true;
                 LosableCheckBox.IsEnabled = true;
                 PermanentCheckBox.IsEnabled = true;
+                RecoverableCheckBox.IsEnabled = true;
             }
         }
 
@@ -301,13 +320,21 @@ namespace GloomhavenDeckbuilder.CardEditor
                 card = new();
                 card.ImgName = Path.GetFileName(ImagePaths[index]);
 
-                // example -> "gh-blood-pact" turns to "Blood Pact"
-                card.Title = string.Join(" ", Path.GetFileNameWithoutExtension(ImagePaths[index]).Split('-').Select(x => x.First().ToString().ToUpper() + x[1..]));
+                try
+                {
+                    // example -> "blood-pact" turns to "Blood Pact"
+                    card.Title = string.Join(" ", Path.GetFileNameWithoutExtension(ImagePaths[index]).Split('-').Select(x => x.First().ToString().ToUpper() + x[1..]));
+                }
+                catch { }
 
-                if (int.TryParse(OcrUtils.DoMagic(ImageUtils.CaptureArea(173, 297, 228 - 173, 342 - 297, (BitmapImage)CardImage.Source)), out int initiative))
-                    card.Initiative = initiative;
-                else
-                    card.Initiative = null;
+                try
+                {
+                    if (int.TryParse(OcrUtils.DoMagic(ImageUtils.CaptureArea(173, 297, 228 - 173, 342 - 297, ImageUtils.BitmapToImageSource(OriginalBitmap))), out int initiative))
+                        card.Initiative = initiative;
+                    else
+                        card.Initiative = null;
+                }
+                catch { }
 
                 CardCollection.Cards.Add(card);
             }

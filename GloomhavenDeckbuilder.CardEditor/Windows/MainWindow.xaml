@@ -17,12 +17,13 @@
             <Button x:Name="NextImageButton" Content="⇒" HorizontalAlignment="Right" Width="100" FontSize="24" TabIndex="6" VerticalAlignment="Top" Click="NextImageButton_Click"/>
             <Button x:Name="OpenDirectoryButton" Content="📁" HorizontalAlignment="Center" Width="100" FontSize="24" IsTabStop="False" VerticalAlignment="Top" Click="OpenDirectoryButton_Click"/>
         </Grid>
-        <Label x:Name="TitleLabel" Content="Title" HorizontalAlignment="Left" Margin="480,64,0,0" VerticalAlignment="Top" Height="40" Width="521" FontSize="24" Foreground="White" />
-        <Label x:Name="LosableLabel" Content="Losable" HorizontalAlignment="Left" Margin="480,384,0,0" VerticalAlignment="Top" Height="40" Width="96" FontSize="24" Foreground="White" />
-        <Label x:Name="LevelLabel" Content="Level" HorizontalAlignment="Left" Margin="480,145,0,0" VerticalAlignment="Top" Height="40" Width="521" FontSize="24" Foreground="White" />
-        <Label x:Name="InitiativeLabel" Content="Initiative" HorizontalAlignment="Left" Margin="480,225,0,0" VerticalAlignment="Top" Height="40" Width="521" FontSize="24" Foreground="White" />
-        <Label x:Name="CounterLabel" Content="Counter" HorizontalAlignment="Left" Margin="480,304,0,0" VerticalAlignment="Top" Height="40" Width="521" FontSize="24" Foreground="White" />
-        <Label x:Name="PermanentLabel" Content="Permanent" HorizontalAlignment="Left" Margin="679,384,0,0" VerticalAlignment="Top" Height="40" Width="126" FontSize="24" Foreground="White" />
+        <Label x:Name="TitleLabel" Content="Title" HorizontalAlignment="Left" Margin="480,64,0,0" VerticalAlignment="Top" Height="40" Width="521" FontSize="24" Foreground="White" Padding="0,5,5,5" />
+        <Label x:Name="LosableLabel" Content="Losable" HorizontalAlignment="Left" Margin="480,384,0,0" VerticalAlignment="Top" Height="40" Width="96" FontSize="24" Foreground="White" Padding="0,5,5,5" />
+        <Label x:Name="LevelLabel" Content="Level" HorizontalAlignment="Left" Margin="480,145,0,0" VerticalAlignment="Top" Height="40" Width="521" FontSize="24" Foreground="White" Padding="0,5,5,5" />
+        <Label x:Name="InitiativeLabel" Content="Initiative" HorizontalAlignment="Left" Margin="480,225,0,0" VerticalAlignment="Top" Height="40" Width="521" FontSize="24" Foreground="White" Padding="0,5,5,5" />
+        <Label x:Name="CounterLabel" Content="Counter" HorizontalAlignment="Left" Margin="480,304,0,0" VerticalAlignment="Top" Height="40" Width="521" FontSize="24" Foreground="White" Padding="0,5,5,5" />
+        <Label x:Name="PermanentLabel" Content="Permanent" HorizontalAlignment="Left" Margin="683,384,0,0" VerticalAlignment="Top" Height="40" Width="126" FontSize="24" Foreground="White" Padding="0,5,5,5" />
+        <Label x:Name="RecoverableLabel" Content="Recoverable" HorizontalAlignment="Left" Margin="884,384,0,0" VerticalAlignment="Top" Height="40" Width="155" FontSize="24" Foreground="White" Padding="0,5,5,5" />
         <TextBox x:Name="TitleTextBox" HorizontalAlignment="Left" Margin="480,104,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="520" Height="40" FontSize="24"
                  Validation.ErrorTemplate="{StaticResource ValidationTemplate}"
                  Style="{StaticResource TextBoxInError}" TabIndex="0">
@@ -73,6 +74,11 @@
             </CheckBox.LayoutTransform>
         </CheckBox>
         <CheckBox x:Name="PermanentCheckBox" IsChecked="{Binding CardPermanent}" HorizontalAlignment="Left" Margin="680,425,0,0" VerticalAlignment="Top" Height="16" Width="18" TabIndex="5" Click="PermanentCheckBox_Click">
+            <CheckBox.LayoutTransform>
+                <ScaleTransform ScaleX="2.5" ScaleY="2.5" />
+            </CheckBox.LayoutTransform>
+        </CheckBox>
+        <CheckBox x:Name="RecoverableCheckBox" IsChecked="{Binding CardRecoverable}" HorizontalAlignment="Left" Margin="883,425,0,0" VerticalAlignment="Top" Height="16" Width="18" TabIndex="5" Click="PermanentCheckBox_Click">
             <CheckBox.LayoutTransform>
                 <ScaleTransform ScaleX="2.5" ScaleY="2.5" />
             </CheckBox.LayoutTransform>
