@@ -57,17 +57,7 @@
                 </Binding>
             </TextBox.Text>
         </TextBox>
-        <TextBox x:Name="CounterTextBox" HorizontalAlignment="Left" Margin="480,344,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="520" Height="40" FontSize="24"
-                 Validation.ErrorTemplate="{StaticResource ValidationTemplate}"
-                 Style="{StaticResource TextBoxInError}" TabIndex="3">
-            <TextBox.Text>
-                <Binding Path="CardCounter" UpdateSourceTrigger="PropertyChanged" >
-                    <Binding.ValidationRules>
-                        <c:MinMaxValidationRule Min="0" Max="6"/>
-                    </Binding.ValidationRules>
-                </Binding>
-            </TextBox.Text>
-        </TextBox>
+        <TextBox x:Name="CounterTextBox" HorizontalAlignment="Left" Margin="480,344,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="520" Height="40" FontSize="24" TabIndex="3"></TextBox>
         <CheckBox x:Name="LosableCheckBox" IsChecked="{Binding CardLosable}" HorizontalAlignment="Left" Margin="478,425,0,0" VerticalAlignment="Top" Height="16" Width="17" TabIndex="4">
             <CheckBox.LayoutTransform>
                 <ScaleTransform ScaleX="2.5" ScaleY="2.5" />

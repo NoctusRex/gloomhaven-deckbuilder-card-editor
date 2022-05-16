@@ -99,26 +99,6 @@ namespace GloomhavenDeckbuilder.CardEditor
             }
         }
 
-        public string CardCounter
-        {
-            get
-            {
-                if (Card.Counter is null) return "";
-
-                return Card.Counter.Value.ToString();
-            }
-            set
-            {
-                if (string.IsNullOrEmpty(value))
-                    Card.Counter = null;
-                else
-                    Card.Counter = int.Parse(value);
-
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(CardCounter)));
-                UpdateJson();
-            }
-        }
-
         public bool CardLosable
         {
             get
@@ -206,7 +186,6 @@ namespace GloomhavenDeckbuilder.CardEditor
             UpdateSource(TitleTextBox);
             UpdateSource(LevelTextBox);
             UpdateSource(InitiativeTextBox);
-            UpdateSource(CounterTextBox);
         }
 
         private static void UpdateSource(TextBox textBox) => textBox.GetBindingExpression(TextBox.TextProperty).UpdateSource();
@@ -225,13 +204,13 @@ namespace GloomhavenDeckbuilder.CardEditor
             CardTitle = Card.Title;
             TitleTextBox.Text = CardTitle;
 
-            CardCounter = Card.Counter.HasValue ? Card.Counter.Value.ToString() : "0";
-            CounterTextBox.Text = CardCounter;
-
             CardLevel = Card.Level.HasValue ? Card.Level.Value.ToString() : "";
             LevelTextBox.Text = CardLevel;
 
+            CounterTextBox.Text = Card.Counters.Count.ToString();
+
             CardLosable = Card.Losable;
+            LosableCheckBox.IsEnabled = !Card.Permanent;
             LosableCheckBox.IsChecked = CardLosable;
 
             CardInitiative = Card.Initiative.HasValue ? Card.Initiative.Value.ToString() : "";
@@ -267,7 +246,6 @@ namespace GloomhavenDeckbuilder.CardEditor
                 TitleTextBox.IsEnabled = true;
                 LevelTextBox.IsEnabled = true;
                 InitiativeTextBox.IsEnabled = true;
-                CounterTextBox.IsEnabled = true;
                 LosableCheckBox.IsEnabled = true;
                 PermanentCheckBox.IsEnabled = true;
                 RecoverableCheckBox.IsEnabled = true;
@@ -378,7 +356,13 @@ namespace GloomhavenDeckbuilder.CardEditor
             CardEnhancement? enhancement = new CardEnhancementWindow().GetEnhancement(x, y);
             if (enhancement is null) return;
 
-            Card.Enhancements.Add(enhancement);
+            if (enhancement.AbilityLine == AbilityLine.Counter)
+                Card.Counters.Add(new CardCounter() { X = enhancement.X, Y = enhancement.Y });
+            else
+                Card.Enhancements.Add(enhancement);
+
+            CounterTextBox.Text = Card.Counters.Count.ToString();
+
             UpdateJson();
             ModifyOriginalBitmap();
         }
@@ -394,10 +378,20 @@ namespace GloomhavenDeckbuilder.CardEditor
                 if (!hitbox.Contains(new Point(enhancement.X, enhancement.Y))) continue;
 
                 Card.Enhancements.Remove(enhancement);
-                UpdateJson();
-                ModifyOriginalBitmap();
-                return;
+                break;
             }
+
+            foreach (CardCounter counter in Card.Counters)
+            {
+                if (!hitbox.Contains(new Point(counter.X, counter.Y))) continue;
+
+                Card.Counters.Remove(counter);
+                break;
+            }
+
+            CounterTextBox.Text = Card.Counters.Count.ToString();
+            UpdateJson();
+            ModifyOriginalBitmap();
         }
 
         private void CardImage_MouseMove(object sender, System.Windows.Input.MouseEventArgs e)
@@ -442,6 +436,7 @@ namespace GloomhavenDeckbuilder.CardEditor
             int hexWidth = 34;
             int hexHeight = 42;
             int hexBorder = 3;
+            int counterRadius = 25;
 
             g.DrawImage(OriginalBitmap, 0, 0);
 
@@ -472,6 +467,25 @@ namespace GloomhavenDeckbuilder.CardEditor
                         (ENHANCEMENT_RADIUS * 2) - (border * 2),
                         (ENHANCEMENT_RADIUS * 2) - (border * 2));
                 }
+
+            foreach (CardCounter counter in Card.Counters)
+            {
+                g.FillEllipse(new SolidBrush(Color.Red),
+                    counter.X - counterRadius,
+                    counter.Y - counterRadius,
+                    counterRadius * 2,
+                    counterRadius * 2);
+                g.FillEllipse(new SolidBrush(Color.IndianRed),
+                    counter.X - counterRadius + border,
+                    counter.Y - counterRadius + border,
+                    (counterRadius * 2) - (border * 2),
+                    (counterRadius * 2) - (border * 2));
+                g.DrawString((Card.Counters.IndexOf(counter) + 1).ToString(), 
+                    new Font("Courier New", 16), 
+                    new SolidBrush(Color.Black), 
+                    counter.X - counterRadius / 2, 
+                    counter.Y - counterRadius / 2);
+            }
 
             CardImage.Source = ImageUtils.BitmapToImageSource(ModifiedOriginalBitmap);
         }

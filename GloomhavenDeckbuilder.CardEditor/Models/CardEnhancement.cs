@@ -6,7 +6,8 @@ namespace GloomhavenDeckbuilder.CardEditor.Models
     {
         Main,
         Hex,
-        Summon
+        Summon,
+        Counter
     }
 
     /// <summary>

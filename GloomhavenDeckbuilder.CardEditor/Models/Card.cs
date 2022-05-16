@@ -11,8 +11,8 @@ namespace GloomhavenDeckbuilder.CardEditor.Models
         [JsonProperty("imgName")]
         public string ImgName { get; set; } = string.Empty;
 
-        [JsonProperty("counter")]
-        public int? Counter { get; set; } = null;
+        [JsonProperty("counters")]
+        public List<CardCounter> Counters { get; set; } = new ();
 
         [JsonProperty("losable")]
         public bool Losable { get; set; } = false;
